@@ -29,7 +29,7 @@ jobs:
       env:
         PWS_URL: ${{ secrets.PWS_URL }}
       run: |
-          echo "Creating temporary branch"
+          echo "Creating temporary branch..."
           git checkout -b tmp
 
           # Push to master branch and capture the output
