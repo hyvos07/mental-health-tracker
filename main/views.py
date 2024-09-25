@@ -11,6 +11,7 @@ from django.contrib.auth.decorators import login_required
 
 from main.forms import MoodEntryForm
 from main.models import MoodEntry
+from utils.utils import time_ago
 
 
 # Register Page
@@ -63,7 +64,7 @@ def show_main(request):
         'class': 'PBP F',
         'npm': '2306220753',
         'mood_entries': mood_entries,
-        'last_login': request.COOKIES['last_login'],
+        'last_login': time_ago(request.COOKIES['last_login']),
     }
 
     return render(request, "main.html", context)
