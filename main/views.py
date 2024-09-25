@@ -3,7 +3,7 @@ import datetime
 from django.core import serializers
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.urls import reverse
-from django.shortcuts import render, redirect   # Tambahkan import redirect di baris ini
+from django.shortcuts import render, redirect, reverse
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
@@ -60,8 +60,8 @@ def show_main(request):
 
     context = {
         'name': request.user.username,
-        'class': 'PBP D',
-        'npm': '2306123456',
+        'class': 'PBP F',
+        'npm': '2306220753',
         'mood_entries': mood_entries,
         'last_login': request.COOKIES['last_login'],
     }
@@ -81,6 +81,27 @@ def create_mood_entry(request):
 
     context = {'form': form}
     return render(request, "create_mood_entry.html", context)
+
+
+# Update data of Moods
+def edit_mood(request, id):
+    mood = MoodEntry.objects.get(pk = id)
+
+    form = MoodEntryForm(request.POST or None, instance=mood)
+
+    if form.is_valid() and request.method == "POST":
+        form.save()
+        return HttpResponseRedirect(reverse('main:show_main'))
+
+    context = {'form': form}
+    return render(request, "edit_mood.html", context)
+
+
+# Delete data of Moods
+def delete_mood(request, id):
+    mood = MoodEntry.objects.get(pk = id)
+    mood.delete()
+    return HttpResponseRedirect(reverse('main:show_main'))
 
 
 # Show XML of all data
