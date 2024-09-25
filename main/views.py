@@ -11,7 +11,7 @@ from django.contrib.auth.decorators import login_required
 
 from main.forms import MoodEntryForm
 from main.models import MoodEntry
-from utils.utils import time_ago
+from main.utils.utils import time_ago
 
 
 # Register Page
