@@ -8,6 +8,9 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+from django.utils.html import strip_tags
 
 from main.forms import MoodEntryForm
 from main.models import MoodEntry
@@ -57,13 +60,13 @@ def logout_user(request):
 # Show Main Page with lists of Mood Entries
 @login_required(login_url='/login')
 def show_main(request):
-    mood_entries = MoodEntry.objects.filter(user=request.user)
+    # mood_entries = MoodEntry.objects.filter(user=request.user)
 
     context = {
         'name': request.user.username,
         'class': 'PBP F',
         'npm': '2306220753',
-        'mood_entries': mood_entries,
+        # 'mood_entries': mood_entries,
         'last_login': time_ago(request.COOKIES['last_login']),
     }
 
@@ -82,6 +85,25 @@ def create_mood_entry(request):
 
     context = {'form': form}
     return render(request, "create_mood_entry.html", context)
+
+
+# Add mood entry using AJAX
+@csrf_exempt
+@require_POST
+def add_mood_entry_ajax(request):
+    mood = strip_tags(request.POST.get("mood"))
+    feelings = strip_tags(request.POST.get("feelings"))
+    mood_intensity = request.POST.get("mood_intensity")
+    user = request.user
+
+    new_mood = MoodEntry(
+        mood=mood, feelings=feelings,
+        mood_intensity=mood_intensity,
+        user=user
+    )
+    new_mood.save()
+
+    return HttpResponse(b"CREATED", status=201)
 
 
 # Update data of Moods
@@ -113,7 +135,7 @@ def show_xml(request):
 
 # Show JSON of all data
 def show_json(request):
-    data = MoodEntry.objects.all()
+    data = MoodEntry.objects.filter(user=request.user)
     return HttpResponse(serializers.serialize("json", data), content_type="application/json")
 
 
