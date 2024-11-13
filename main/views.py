@@ -1,4 +1,5 @@
 import datetime
+import json
 
 from django.core import serializers
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
@@ -25,9 +26,10 @@ def register(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Your account has been successfully created!')
+            messages.success(
+                request, 'Your account has been successfully created!')
             return redirect('main:login')
-    context = {'form':form}
+    context = {'form': form}
     return render(request, 'register.html', context)
 
 
@@ -108,7 +110,7 @@ def add_mood_entry_ajax(request):
 
 # Update data of Moods
 def edit_mood(request, id):
-    mood = MoodEntry.objects.get(pk = id)
+    mood = MoodEntry.objects.get(pk=id)
 
     form = MoodEntryForm(request.POST or None, instance=mood)
 
@@ -122,7 +124,7 @@ def edit_mood(request, id):
 
 # Delete data of Moods
 def delete_mood(request, id):
-    mood = MoodEntry.objects.get(pk = id)
+    mood = MoodEntry.objects.get(pk=id)
     mood.delete()
     return HttpResponseRedirect(reverse('main:show_main'))
 
@@ -149,3 +151,23 @@ def show_xml_by_id(request, id):
 def show_json_by_id(request, id):
     data = MoodEntry.objects.filter(pk=id)
     return HttpResponse(serializers.serialize("json", data), content_type="application/json")
+
+
+# Make Mood Mobile
+@csrf_exempt
+def create_mood_flutter(request):
+    if request.method == 'POST':
+
+        data = json.loads(request.body)
+        new_mood = MoodEntry.objects.create(
+            user=request.user,
+            mood=data["mood"],
+            mood_intensity=int(data["mood_intensity"]),
+            feelings=data["feelings"]
+        )
+
+        new_mood.save()
+
+        return JsonResponse({"status": "success"}, status=200)
+    else:
+        return JsonResponse({"status": "error"}, status=401)
